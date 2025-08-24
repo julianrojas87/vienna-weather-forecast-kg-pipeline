@@ -189,15 +189,15 @@ The instance provided in the Docker Compose file is configured to be accessible 
 
 **Steps:**
 
-- [ ] Convert validated RDF to SDS records with `rdfc:Sdsify` (from [@rdfc/sds-processors-ts](https://github.com/rdf-connect/sds-processors-ts))
+- [x] Convert validated RDF to SDS records with `rdfc:Sdsify` (from [@rdfc/sds-processors-ts](https://github.com/rdf-connect/sds-processors-ts))
   - Configure it with input/output channels and an SDS stream ID (e.g., `http://ex.org/ViennaWeather`)  
   - Import its definition via `owl:imports`  
   - Attach it to the existing `rdfc:NodeRunner`
-- [ ] Add the `rdfc:SPARQLIngest` (from [@rdfc/sparql-ingest-processor-ts](https://github.com/rdf-connect/sparql-ingest-processor-ts))
+- [x] Add the `rdfc:SPARQLIngest` (from [@rdfc/sparql-ingest-processor-ts](https://github.com/rdf-connect/sparql-ingest-processor-ts))
   - Configure it to use the Virtuoso SPARQL endpoint (e.g., `http://localhost:8890/sparql`)  
   - Define input/output channels  
   - Import its definition and attach it to the `rdfc:NodeRunner`
-- [ ] Change the input channel of the first `rdfc:LogProcessorJs` processor to the output channel of the `rdfc:SPARQLIngest` processor to log the SPARQL queries that are sent to the Virtuoso instance.
+- [x] Change the input channel of the first `rdfc:LogProcessorJs` processor to the output channel of the `rdfc:SPARQLIngest` processor to log the SPARQL queries that are sent to the Virtuoso instance.
 
 ✅ Solution available in **`task-4` branch**.  
 
