@@ -236,18 +236,18 @@ We’ll translate German literals using the Hugging Face model [Helsinki-NLP/opu
 
 **Steps:**
 
-- [ ] Install `transformers`:  
+- [x] Install `transformers`:  
   ```bash
   uv add transformers
   ```  
-- [ ] Load the model + tokenizer in `TranslationProcessor.init`  
-- [ ] In `transform`, implement the logic to translate language-tagged literals:
+- [x] Load the model + tokenizer in `TranslationProcessor.init`  
+- [x] In `transform`, implement the logic to translate language-tagged literals:
   - parse triples with `rdflib`  
   - Identify literals with `@de`  
   - Translate to English  
   - Emit both original and translated triples  
-- [ ] (Optional) Add unit tests  
-- [ ] Build the project  
+- [x] (Optional) Add unit tests  
+- [x] Build the project  
 
 ✅ Solution in **`task-6` branch**
 
