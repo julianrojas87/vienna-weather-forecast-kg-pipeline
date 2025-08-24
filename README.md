@@ -164,13 +164,13 @@ To help you with this, we prepared a [SHACL shape file](./pipeline/resources/sha
 
 **Steps:**
 
-- [ ] Add the `rdfc:Validate` (from [@rdfc/shacl-processor-ts](https://github.com/rdf-connect/shacl-processor-ts))
+- [x] Add the `rdfc:Validate` (from [@rdfc/shacl-processor-ts](https://github.com/rdf-connect/shacl-processor-ts))
   - Configure it to use the provided SHACL shape file
   - Define input/output channels
   - Import its definition via `owl:imports`
   - Attach it to the existing `rdfc:NodeRunner`
-- [ ] Log only valid data through the first logger  
-- [ ] Log reports at `warn` level with the second logger  
+- [x] Log only valid data through the first logger  
+- [x] Log reports at `warn` level with the second logger  
 
 ✅ Solution available in **`task-3` branch**.
 
