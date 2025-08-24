@@ -50,7 +50,7 @@ Make sure the following are installed:
   - uv (for managing Python packages)
 
 **If you do not want to install these tools locally**, we have provided a **Dockerfile** that sets up an environment with all software installed.
-You can build and run it with:
+You can build and run it with the following commands:
 
 ```bash
 # Build the Docker image

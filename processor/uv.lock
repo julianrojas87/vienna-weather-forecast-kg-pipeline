@@ -167,7 +167,11 @@ wheels = [
 
 [[package]]
 name = "rdfc-runner"
+<<<<<<< HEAD
 version = "0.0.3"
+=======
+version = "0.0.1"
+>>>>>>> d18ac45 (Add assignment and solution to Task 0)
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "grpcio" },
@@ -176,9 +180,15 @@ dependencies = [
     { name = "rdfc-proto" },
     { name = "types-protobuf" },
 ]
+<<<<<<< HEAD
 sdist = { url = "https://files.pythonhosted.org/packages/ed/79/dd8a7d47e643a2820eae79b2b5d4db94ebd0e97c1b6dfc28f65131e3efd8/rdfc_runner-0.0.3.tar.gz", hash = "sha256:9f54cce404f5ff8d299f5b28be10fec548b23bf5338dbd0ab8cfbb364544a211", size = 21458, upload-time = "2025-08-25T07:57:35.681Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0c/7b/6449b5607ec2abd2c1fcf6e2275dc6a83626c7dfb7ca7fdbddc1ccd6af9b/rdfc_runner-0.0.3-py3-none-any.whl", hash = "sha256:0689a9ee049cd998c910433794b7b4fa665fa73cf534932d8e0f63cfa148ee56", size = 14839, upload-time = "2025-08-25T07:57:36.432Z" },
+=======
+sdist = { url = "https://files.pythonhosted.org/packages/85/a2/8e06c18cf446f1b304202749489622a97d61da553b3b522be11b5547efaf/rdfc_runner-0.0.1.tar.gz", hash = "sha256:a9bd3caafc3b65260451b06fc2f072eaca950925e7556cdc5948ba07a5ea2f76", size = 21148, upload-time = "2025-08-20T11:39:13.592Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9a/f1/6a73cf4a6c42ce26293a60bcd8a5542c548caf329d6106450f6d4268a1f7/rdfc_runner-0.0.1-py3-none-any.whl", hash = "sha256:3e4a3b770c10b1a8761e7cab290bb9f60278091aae89c188090d0dfd77599eec", size = 14709, upload-time = "2025-08-20T11:39:12.15Z" },
+>>>>>>> d18ac45 (Add assignment and solution to Task 0)
 ]
 
 [[package]]
@@ -197,7 +207,11 @@ requires-dist = [
     { name = "pytest", specifier = ">=8.4.1" },
     { name = "pytest-asyncio", specifier = ">=1.1.0" },
     { name = "rdfc-proto", specifier = ">=0.0.1" },
+<<<<<<< HEAD
     { name = "rdfc-runner", specifier = ">=0.0.3" },
+=======
+    { name = "rdfc-runner", specifier = ">=0.0.1" },
+>>>>>>> d18ac45 (Add assignment and solution to Task 0)
 ]
 
 [[package]]
