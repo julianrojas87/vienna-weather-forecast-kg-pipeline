@@ -61,17 +61,17 @@ You may start from our provided project structure (recommended) or consult the [
 
 **Steps:**
 
-- [ ] Create a `pipeline/` directory (all Part 1 work happens here).  
-- [ ] Inside `pipeline/`, create:
+- [x] Create a `pipeline/` directory (all Part 1 work happens here).  
+- [x] Inside `pipeline/`, create:
   - `pipeline.ttl` (pipeline configuration)  
   - `README.md` (documentation)  
   - `package.json` (via `npm init` or manually)  
   - `.gitignore` (exclude `node_modules/` etc.)  
-- [ ] Install the orchestrator:  
+- [x] Install the orchestrator:  
   ```bash
   npm install @rdfc/orchestrator-js
   ```  
-- [ ] Initialize the RDF-Connect pipeline in `pipeline.ttl`:
+- [x] Initialize the RDF-Connect pipeline in `pipeline.ttl`:
   - Add RDF namespaces (e.g., `rdfc`, `owl`, `ex`)
   - Declare the pipeline with `<> a rdfc:Pipeline`
 
@@ -100,18 +100,18 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
 
 **Steps:**
 
-- [ ] Add an `rdfc:HttpFetch` processor (from [@rdfc/http-utils-processor-ts](https://github.com/rdf-connect/http-utils-processor-ts))  
+- [x] Add an `rdfc:HttpFetch` processor (from [@rdfc/http-utils-processor-ts](https://github.com/rdf-connect/http-utils-processor-ts))  
   - Configure it to fetch from the API endpoint  
   - Define input/output channels  
   - Import definition via `owl:imports`  
-- [ ] Add an `rdfc:NodeRunner` (from [@rdfc/js-runner](https://github.com/rdf-connect/js-runner))  
+- [x] Add an `rdfc:NodeRunner` (from [@rdfc/js-runner](https://github.com/rdf-connect/js-runner))  
   - Import and attach it to the pipeline  
   - Connect it to the `rdfc:HttpFetch` processor using the `rdfc:processor` property
-- [ ] Add a `rdfc:LogProcessorJs` (from [@rdfc/log-processor-ts](https://github.com/rdf-connect/log-processor-ts))  
+- [x] Add a `rdfc:LogProcessorJs` (from [@rdfc/log-processor-ts](https://github.com/rdf-connect/log-processor-ts))  
   - Configure it with e.g., log level: `info` & label: `output`  
   - Connect the output channel of `rdfc:HttpFetch` to its input channel
   - Import its definition and attach it to the `rdfc:NodeRunner`
-- [ ] Run the pipeline:  
+- [x] Run the pipeline:  
   ```bash
   npx rdfc pipeline.ttl
   # or with debug logging:
@@ -135,17 +135,17 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
 
 **Steps:**
 
-- [ ] Use `rdfc:GlobRead` to read the RML mapping file
+- [x] Use `rdfc:GlobRead` to read the RML mapping file
   -  Configure it to read the mapping file from where you saved it (e.g., `./resources/mapping.rml.ttl`)  
   -  Import its definition and attach it to the existing `rdfc:NodeRunner`
-- [ ] Pass mapping + JSON into `rdfc:RmlMapper`  
-- [ ] Add the `rdfc:RmlMapper` (from [rml-processor-jvm](https://github.com/rdf-connect/rml-processor-jvm))
+- [x] Pass mapping + JSON into `rdfc:RmlMapper`  
+- [x] Add the `rdfc:RmlMapper` (from [rml-processor-jvm](https://github.com/rdf-connect/rml-processor-jvm))
   - Configure the input/output channels
   - Import its definition via `owl:imports`
-- [ ] Add an `rdfc:JvmRunner` (from [rdf-connect/jvm-runner](https://github.com/rdf-connect/jvm-runner))
+- [x] Add an `rdfc:JvmRunner` (from [rdf-connect/jvm-runner](https://github.com/rdf-connect/jvm-runner))
   - Import and attach it to the pipeline
   - Connect the `rdfc:RmlMapper` processor to it using the `rdfc:processor` property
-- [ ] Redirect the logging processor to log **RDF output** instead of raw JSON  
+- [x] Redirect the logging processor to log **RDF output** instead of raw JSON  
 
 ✅ Solution available in **`task-2` branch**.
 
