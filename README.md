@@ -258,13 +258,13 @@ Run your Python processor inside the pipeline with `rdfc:PyRunner` ([rdf-connect
 
 **Steps:**
 
-- [ ] Build the processor into a package  
-- [ ] Add a `pyproject.toml` in `pipeline/`
+- [x] Build the processor into a package  
+- [x] Add a `pyproject.toml` in `pipeline/`
   - Specify the Python version to use to one specific version (e.g., `==3.13.*`). You need this to have a deterministic path for the `owl:imports` statement
   - Configure `[tool.hatch.envs.default]` to use a virtual environment called `.venv`
-- [ ] Install your built processor locally with `uv add ../processor/dist/your-processor.tar.gz`  
-- [ ] Add `rdfc:PyRunner` to the pipeline and attach your processor (from [rdf-connect/py-runner](https://github.com/rdf-connect/py-runner))
-- [ ] Connect it between the RML step and the SHACL validator  
+- [x] Install your built processor locally with `uv add ../processor/dist/your-processor.tar.gz`  
+- [x] Add `rdfc:PyRunner` to the pipeline and attach your processor (from [rdf-connect/py-runner](https://github.com/rdf-connect/py-runner))
+- [x] Connect it between the RML step and the SHACL validator  
 
 ✅ Solution in **`task-7` branch**  
 
