@@ -1,7 +1,7 @@
 # vienna-weather-forecast-kg-pipeline
 
-RDF-Connect pipeline to ingest Vienna’s weather forecast into a knowledge graph.  
-This repository provides **incremental solutions** for the hands-on tutorial at  
+RDF-Connect pipeline to produce a knowledge graph from Vienna’s weather forecast data. 
+This repository provides **incremental solutions** for the hands-on tutorial at 
 [SEMANTiCS 2025](https://2025-eu.semantics.cc/page/cfp_ws):  
 👉 [Tutorial Materials](https://rdf-connect.github.io/Tutorial-SEMANTiCS2025/) & [Tutorial Slides](https://rdf-connect.github.io/Tutorial-SEMANTiCS2025/slides)
 
@@ -11,7 +11,7 @@ This repository provides **incremental solutions** for the hands-on tutorial at
 
 This tutorial walks you step by step through building a **provenance-aware, streaming RDF pipeline** using the language-agnostic framework **RDF-Connect**.  
 
-The use case: ingesting weather forecast data for Vienna from the **GeoSphere Austria API** into a queryable **knowledge graph**.
+The use case: Producing and publishing a queryable **knowledge graph** from Vienna's weather forecast data extracted from the **GeoSphere Austria API**.
 
 You will:
 
@@ -23,7 +23,7 @@ You will:
 By the end, you will have:
 
 - A working RDF-Connect pipeline for real-world data  
-- A clear understanding of how to integrate heterogeneous processors across languages  
+- A clear understanding of how to integrate heterogeneous processors across execution environments 
 - Practical experience with implementing RDF-Connect processors
 
 The tutorial is designed for all experience levels, and you can follow along at your own pace.  
@@ -41,8 +41,9 @@ The recommended starting point is to **fork and clone this repository**, then sw
 Make sure the following are installed:
 
 - **Node.js ≥16**  
-- **Java ≥11**  
-- **Python ≥3.8** (we recommend 3.13 for Part 2)  
+- **Java ≥17**
+- **Python ≥3.8** (we recommend 3.13 for Part 2)
+- **Gradle ≥9.0**
 
 The pipeline will store data in a **Virtuoso triple store**.  
 We recommend running Virtuoso via **Docker + Docker Compose**, so install both if you plan to follow that setup.
@@ -70,23 +71,43 @@ You may start from our provided project structure (recommended) or consult the [
 - [ ] Install the orchestrator:  
   ```bash
   npm install @rdfc/orchestrator-js
-  ```  
+  ```
+- [ ] Install the Javascript runner:
+  ```bash
+  npm install @rdfc/js-runner
+  ```
+
+  **Expected folder structure:**
+  ```
+  ├── pipeline/           # Part 1 work lives here
+  │   ├── node_modules/   
+  │   ├── .gitignore      
+  │   ├── package.json    
+  │   ├── pipeline.ttl    
+  │   └── README.md       
+  ├── processor/          # Custom processor (Part 2)
+  └── README.md           # Tutorial instructions
+  ```
+
 - [ ] Initialize the RDF-Connect pipeline in `pipeline.ttl`:
   - Add RDF namespaces (e.g., `rdfc`, `owl`, `ex`)
   - Declare the pipeline with `<> a rdfc:Pipeline`
 
-**Expected structure:**
+  **Expected pipeline state:**
+  ```turtle
+  @prefix rdfc: <https://w3id.org/rdf-connect#>.
+  @prefix owl: <http://www.w3.org/2002/07/owl#>.
+  @prefix ex: <http://example.org/>.
 
-```
-├── pipeline/           # Part 1 work lives here
-│   ├── node_modules/   
-│   ├── .gitignore      
-│   ├── package.json    
-│   ├── pipeline.ttl    
-│   └── README.md       
-├── processor/          # Custom processor (Part 2)
-└── README.md           # Tutorial instructions
-```
+  ### Import runners and processors
+
+  ### Define the channels
+
+  ### Define the pipeline
+  <> a rdfc:Pipeline.
+
+  ### Define the processors
+  ```
 
 ✅ The solution for this task is in the **`main` branch**.
 
