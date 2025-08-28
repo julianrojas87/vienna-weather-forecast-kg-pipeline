@@ -112,26 +112,82 @@ You may start from our provided project structure (recommended) or consult the [
 ✅ The solution for this task is in the **`main` branch**.
 
 
-#### Task 1: Fetch weather data as JSON
+#### Task 1: Fetch weather data from the GeoSphere Austria API
 
-Configure the pipeline to fetch weather data from GeoSphere Austria (station `11035`, near the SEMANTiCS venue):
+Configure the pipeline to fetch weather data from GeoSphere Austria (station `11035`, near the SEMANTiCS venue) in JSON format:
 
 - API endpoint:  
   <https://dataset.api.hub.geosphere.at/v1/station/current/tawes-v1-10min?parameters=TL,RR&station_ids=11035>
 
 **Steps:**
 
-- [ ] Add an `rdfc:HttpFetch` processor (from [@rdfc/http-utils-processor-ts](https://github.com/rdf-connect/http-utils-processor-ts))  
-  - Configure it to fetch from the API endpoint  
-  - Define input/output channels  
-  - Import definition via `owl:imports`  
-- [ ] Add an `rdfc:NodeRunner` (from [@rdfc/js-runner](https://github.com/rdf-connect/js-runner))  
-  - Import and attach it to the pipeline  
-  - Connect it to the `rdfc:HttpFetch` processor using the `rdfc:processor` property
-- [ ] Add a `rdfc:LogProcessorJs` (from [@rdfc/log-processor-ts](https://github.com/rdf-connect/log-processor-ts))  
-  - Configure it with e.g., log level: `info` & label: `output`  
-  - Connect the output channel of `rdfc:HttpFetch` to its input channel
-  - Import its definition and attach it to the `rdfc:NodeRunner`
+- [ ] Add an `rdfc:HttpFetch` processor (implemented at [@rdfc/http-utils-processor-ts](https://github.com/rdf-connect/http-utils-processor-ts))
+  - Install the processor
+  ```bash
+  npm install @rdfc/http-utils-processor-ts
+  ```
+  - Import semantic definition via `owl:imports`
+  ```turtle
+  ### Import runners and processors
+  <> owl:imports <./node_modules/@rdfc/http-utils-processor-ts/processors.ttl>.
+  ```  
+  - Define input/output channels
+  ```turtle
+  ### Define the channels
+  <json> a rdfc:Reader, rdfc:Writer.
+  ```
+  - Configure it to fetch from the API endpoint 
+  ```turtle
+  ### Define the processors
+  # Processor to fetch data from a JSON API
+  <fetcher> a rdfc:HttpFetch;
+      rdfc:url <https://dataset.api.hub.geosphere.at/v1/station/current/tawes-v1-10min?parameters=TL,RR&station_ids=11035>;
+      rdfc:writer <json>.
+  ``` 
+       
+- [ ] Add an `rdfc:NodeRunner` (implemented at [@rdfc/js-runner](https://github.com/rdf-connect/js-runner))  
+  - Import its semantic definition  
+  ```turtle
+  ### Import runners and processors
+  <> owl:imports <./node_modules/@rdfc/js-runner/index.ttl>.
+  ```
+  - Define it and link it to the `rdfc:HttpFetch` processor instance using the `rdfc:consistsOf`,  `rdfc:instantiates` and `rdfc:processor` properties
+  ```turtle
+  ### Define the pipeline
+  <> a rdfc:Pipeline;
+   rdfc:consistsOf [
+       rdfc:instantiates rdfc:NodeRunner;
+       rdfc:processor <fetcher>;
+   ].
+  ```
+- [ ] Add a `rdfc:LogProcessorJs` (from [@rdfc/log-processor-ts](https://github.com/rdf-connect/log-processor-ts)) 
+  - Install the processor
+  ```bash
+  npm install @rdfc/log-processor-ts
+  ```
+  - Import its semantic definition
+  ```turtle
+  ### Import runners and processors
+  <> owl:imports <./node_modules/@rdfc/log-processor-ts/processor.ttl> .
+  ```
+  - Create an instance and configure it with e.g., log level: `info`, label: `output` and link it to the output channel of `rdfc:HttpFetch`
+  ```turtle
+  ### Define the processors
+  # Processor to log the output
+  <logger> a rdfc:LogProcessorJs;
+        rdfc:reader <json>;
+        rdfc:level "info";
+        rdfc:label "output".
+  ``` 
+  - Attach it to the `rdfc:NodeRunner`
+  ```turtle
+  ### Define the pipeline
+  <> a rdfc:Pipeline;
+   rdfc:consistsOf [
+       rdfc:instantiates rdfc:NodeRunner;
+       rdfc:processor <fetcher>, <logger>;
+   ].
+  ```
 - [ ] Run the pipeline:  
   ```bash
   npx rdfc pipeline.ttl
@@ -139,7 +195,7 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
   LOG_LEVEL=debug npx rdfc pipeline.ttl
   ```
 
-✅ Solution available in **`task-1` branch**.
+✅ Complete solution available in **`task-1` branch**.
 
 
 #### Task 2: Convert JSON to RDF
