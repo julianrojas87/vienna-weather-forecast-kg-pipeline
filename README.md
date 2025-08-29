@@ -116,12 +116,22 @@ You may start from our provided project structure (recommended) or consult the [
 
 Configure the pipeline to fetch weather data from GeoSphere Austria (station `11035`, near the SEMANTiCS venue) in JSON format:
 
-- API endpoint:  
-  <https://dataset.api.hub.geosphere.at/v1/station/current/tawes-v1-10min?parameters=TL,RR&station_ids=11035>
+**API endpoint:**  
+- <https://dataset.api.hub.geosphere.at/v1/station/current/tawes-v1-10min?parameters=TL,RR&station_ids=11035>
+
+**Processors to add:**
+
+- `rdfc:HttpFetch` – HTTP processor implemented in Javascript (source code at [@rdfc/http-utils-processor-ts](https://github.com/rdf-connect/http-utils-processor-ts))
+- `rdfc:LogProcessorJs` – Processor that logs to console any input stream, implemented in Javascript (source code at [@rdfc/log-processor-ts](https://github.com/rdf-connect/log-processor-ts))
+
+**Runners to add:**
+
+- `rdfc:NodeRunner` – run Javascript processors (source code at [@rdfc/js-runner](https://github.com/rdf-connect/js-runner))
 
 **Steps:**
 
-- [ ] Add an `rdfc:HttpFetch` processor (implemented at [@rdfc/http-utils-processor-ts](https://github.com/rdf-connect/http-utils-processor-ts))
+- [ ] Add an `rdfc:HttpFetch` processor instance
+  
   - Install the processor
   ```bash
   npm install @rdfc/http-utils-processor-ts
@@ -131,7 +141,7 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
   ### Import runners and processors
   <> owl:imports <./node_modules/@rdfc/http-utils-processor-ts/processors.ttl>.
   ```  
-  - Define input/output channels
+  - Define a channel for the fetched JSON data
   ```turtle
   ### Define the channels
   <json> a rdfc:Reader, rdfc:Writer.
@@ -145,13 +155,14 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
       rdfc:writer <json>.
   ``` 
        
-- [ ] Add an `rdfc:NodeRunner` (implemented at [@rdfc/js-runner](https://github.com/rdf-connect/js-runner))  
+- [ ] Add an `rdfc:NodeRunner` NodeJS runner
+  
   - Import its semantic definition  
   ```turtle
   ### Import runners and processors
   <> owl:imports <./node_modules/@rdfc/js-runner/index.ttl>.
   ```
-  - Define it and link it to the `rdfc:HttpFetch` processor instance using the `rdfc:consistsOf`,  `rdfc:instantiates` and `rdfc:processor` properties
+  - Define it as part of the pipeline and link the `rdfc:HttpFetch` processor instance to it using the `rdfc:consistsOf`,  `rdfc:instantiates` and `rdfc:processor` properties
   ```turtle
   ### Define the pipeline
   <> a rdfc:Pipeline;
@@ -160,7 +171,8 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
        rdfc:processor <fetcher>;
    ].
   ```
-- [ ] Add a `rdfc:LogProcessorJs` (from [@rdfc/log-processor-ts](https://github.com/rdf-connect/log-processor-ts)) 
+- [ ] Add a `rdfc:LogProcessorJs` processor instance
+
   - Install the processor
   ```bash
   npm install @rdfc/log-processor-ts
@@ -204,15 +216,19 @@ You will now convert the JSON stream into RDF using **[RML](https://rml.io/)** w
 
 To help you with this, we prepared an [RML mapping file](./pipeline/resources/mapping.rml.ttl) for you that you can use to convert the JSON data to RDF.
 
-**Processors to use:**
+**Processors to add:**
 
-- `rdfc:GlobRead` – read mapping file from disk (implemented at [@rdfc/file-utils-processors-ts](https://github.com/rdf-connect/file-utils-processors-ts))  
-- `rdfc:RmlMapper` – convert heterogeneous data to RDF ([rml-processor-jvm](https://github.com/rdf-connect/rml-processor-jvm))  
-- `rdfc:JvmRunner` – run Java processors ([rdf-connect/jvm-runner](https://github.com/rdf-connect/jvm-runner))  
+- `rdfc:GlobRead` – read files from disk implemented in Javascript (source code at [@rdfc/file-utils-processors-ts](https://github.com/rdf-connect/file-utils-processors-ts))  
+- `rdfc:RmlMapper` – convert heterogeneous data to RDF implemented in Java (source code at [rml-processor-jvm](https://github.com/rdf-connect/rml-processor-jvm)). Internally, it uses the [RMLMapper engine](https://github.com/RMLio/rmlmapper-java)  
+
+**Runners to add:**
+
+- `rdfc:JvmRunner` – run Java processors (source code at [rdf-connect/jvm-runner](https://github.com/rdf-connect/jvm-runner))  
 
 **Steps:**
 
 - [ ] Use `rdfc:GlobRead` to read the RML mapping file
+
   - Install this NodeJS processor
   ```bash
   npm install @rdfc/file-utils-processors-ts
@@ -234,7 +250,7 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
   <mappingReader> a rdfc:GlobRead;
       rdfc:glob <./resources/mapping.rml.ttl>;
       rdfc:output <mappingData>;
-      rdfc:closeOnEnd true.
+      rdfc:closeOnEnd false.
   ```
   - Attach it to the existing `rdfc:NodeRunner`
   ```turtle
@@ -244,8 +260,9 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
        rdfc:instantiates rdfc:NodeRunner;
        rdfc:processor <fetcher>, <logger>, <mappingReader>;
    ].
-- [ ] Add a Java Virtual Machine (JVM) runner (`rdfc:JvmRunner`) (from [rdf-connect/jvm-runner](https://github.com/rdf-connect/jvm-runner)) that allow us to execute Java processors such as the RML mapper processor
-  - Import its semantic definition, which in this cases is packed within the built JAR file of the runner
+- [ ] Add a Java Virtual Machine (JVM) runner (`rdfc:JvmRunner`) that allow us to execute Java processors
+
+  - Import its semantic definition, which in this case, is packed within the built JAR file of the runner
   ```turtle
   ### Import runners and processors
   <> owl:imports <https://javadoc.jitpack.io/com/github/rdf-connect/jvm-runner/runner/master-SNAPSHOT/runner-master-SNAPSHOT-index.jar>.
@@ -261,9 +278,11 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
     rdfc:instantiaties rdfc:JvmRunner;
    ].
   ```
-- [ ] Add the `rdfc:RmlMapper` processor (implemented in Java at [rml-processor-jvm](https://github.com/rdf-connect/rml-processor-jvm))
-  - Install the Java processor using Gradle:
-    - Create a `build.gradle` file with the following content
+- [ ] Add an `rdfc:RmlMapper` processor instance
+
+  - Install the Java processor using Gradle
+
+    - Create a `build.gradle` file inside the `./pipeline` folder with the following content
     ```gradle
     plugins {
         id 'java'
@@ -348,29 +367,115 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
 ✅ Complete solution available in **`task-2` branch**.
 
 
-#### Task 3: Validate RDF with SHACL
+#### Task 3: Validate the produced RDF with SHACL
 
 Next, validate the RDF output against a provided SHACL shape.
 
-To help you with this, we prepared a [SHACL shape file](./pipeline/resources/shacl-shape.ttl) for you that you can use to validate the RDF data.
+To help you with this, we prepared a [SHACL shape file](./pipeline/resources/shacl-shape.ttl) that you can use to validate the RDF data.
 
 
-**Processors:**
+**Processors to add:**
 
-- `rdfc:Validate` – validate RDF data using a SHACL shape ([@rdfc/shacl-processor-ts](https://github.com/rdf-connect/shacl-processor-ts))  
-- Another `rdfc:LogProcessorJs` – log validation reports  
+- `rdfc:Validate` – validate RDF data using a given SHACL shape, implemented in Javascript (source code at [@rdfc/shacl-processor-ts](https://github.com/rdf-connect/shacl-processor-ts)). Internally, this processor relies on [`shacl-engine`](https://github.com/rdf-ext/shacl-engine), a Javascript SHACL engine implementation  
+- Another instance of `rdfc:LogProcessorJs` – for logging SHACL validation reports  
 
 **Steps:**
 
 - [ ] Add the `rdfc:Validate` (from [@rdfc/shacl-processor-ts](https://github.com/rdf-connect/shacl-processor-ts))
-  - Configure it to use the provided SHACL shape file
-  - Define input/output channels
-  - Import its definition via `owl:imports`
-  - Attach it to the existing `rdfc:NodeRunner`
-- [ ] Log only valid data through the first logger  
-- [ ] Log reports at `warn` level with the second logger  
 
-✅ Solution available in **`task-3` branch**.
+  - Install the processor
+  ```bash
+  npm install @rdfc/shacl-processor-ts
+  ```
+  - Import its semantic definition into the pipeline
+  ```turtle
+  ### Import runners and processors
+  <> owl:imports <./node_modules/@rdfc/shacl-processor-ts/processors.ttl>.
+  ```
+  - Define a channel for the SHACL validation reports and for the successfuly validated RDF data
+  ```turtle
+  ### Define the channels
+  <report> a rdfc:Reader, rdfc:Writer.
+  <validated> a rdfc:Reader, rdfc:Writer.
+  ```
+  - Create and instance and configure it to use the provided SHACL shape file and to read the stream of produced RDF data
+  ```turtle
+  ### Define the processors
+  # Processor to validate the output RDF with SHACL
+  <validator> a rdfc:Validate;
+      rdfc:shaclPath <./resources/shacl-shape.ttl>;
+      rdfc:incoming <rdf>;
+      rdfc:outgoing <validated>;
+      rdfc:report <report>;
+      rdfc:validationIsFatal false;
+      rdfc:mime "text/turtle".
+  ```
+  - Link it to the corresponding runner: `rdfc:NodeRunner`
+  ```turtle
+  ### Define the pipeline
+  <> a rdfc:Pipeline;
+   rdfc:consistsOf [
+       rdfc:instantiates rdfc:NodeRunner;
+       rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>;
+   ], [
+    rdfc:instantiaties rdfc:JvmRunner;
+    rdfc:processor <mapper>;
+   ].
+  ```
+- [ ] Use a new instance of `rdfc:LogProcessorJs` to log validation reports at `warn` level
+  - Define the new logger instance
+  ```turtle
+  ### Define the processors  
+  # Processor to log the SHACL report
+  <reporter> a rdfc:LogProcessorJs;
+        rdfc:reader <report>;
+        rdfc:level "warn";
+        rdfc:label "report".
+  ```
+  - Link it to the corresponding runner: `rdfc:NodeRunner`
+  ```turtle
+  ### Define the pipeline
+  <> a rdfc:Pipeline;
+   rdfc:consistsOf [
+       rdfc:instantiates rdfc:NodeRunner;
+       rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>;
+   ], [
+    rdfc:instantiaties rdfc:JvmRunner;
+    rdfc:processor <mapper>;
+   ].
+  ```
+- [ ] Log only valid data through the first logger
+```turtle
+### Define the processors
+# Processor to log the output
+<logger> a rdfc:LogProcessorJs;
+      rdfc:reader <validated>;
+      rdfc:level "info";
+      rdfc:label "output".
+``` 
+- [ ] Run the pipeline with a succesfully validated result. You shall see the produced RDF in the console, similarly to the outcome of `task-2`, given that the validation is successful.
+```bash
+npx rdfc pipeline.ttl
+```
+
+- [ ] Run the pipeline with a failed validation
+
+  - To see the validation process in action, let's alter the SHACL shape to require a property that won't be present in the data. We can add the following property shape
+  ```turtle
+  ex:ObservationCollectionShape a sh:NodeShape ;
+    #...
+    sh:property [
+        sh:path sosa:fakeProperty ;
+        sh:class sosa:Observation ;
+        sh:minCount 1 ;
+    ] .
+  ```
+  - Run the pipeline again to see the warning report
+  ```bash
+  npx rdfc pipeline.ttl
+  ```
+
+✅ Complete solution available in **`task-3` branch**.
 
 
 #### Task 4: Ingest RDF into Virtuoso
