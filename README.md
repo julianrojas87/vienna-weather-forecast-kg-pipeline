@@ -142,7 +142,7 @@ You may start from our provided project structure (recommended) or consult the [
 
 Configure the pipeline to fetch weather data from GeoSphere Austria (station `11035`, near the SEMANTiCS venue) in JSON format:
 
-**API endpoint**:  
+**API endpoint:**  
 - <https://dataset.api.hub.geosphere.at/v1/station/current/tawes-v1-10min?parameters=TL,RR&station_ids=11035>
 
 **Processors to add:**
