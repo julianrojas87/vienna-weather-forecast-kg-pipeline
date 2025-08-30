@@ -95,10 +95,6 @@ You may start from our provided project structure (recommended) or consult the [
   ```bash
   npm install @rdfc/orchestrator-js
   ```
-- [ ] Install the Javascript runner:
-  ```bash
-  npm install @rdfc/js-runner
-  ```
 
   **Expected folder structure:**
   ```
@@ -300,7 +296,7 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
            rdfc:instantiates rdfc:NodeRunner;
            rdfc:processor <fetcher>, <logger>, <mappingReader>;
        ], [
-           rdfc:instantiaties rdfc:JvmRunner;
+           rdfc:instantiates rdfc:JvmRunner;
        ].
     ```
 - [ ] Add an `rdfc:RmlMapper` processor instance
