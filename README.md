@@ -135,7 +135,7 @@ You may start from our provided project structure (recommended) or consult the [
   ### Define the processors
   ```
 
-✅ The solution for this task is in the **`main` branch**.
+✅ The solution for this task is in the [**`main` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/main).
 
 
 #### Task 1: Fetch weather data from the GeoSphere Austria API
@@ -233,7 +233,7 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
   LOG_LEVEL=debug npx rdfc pipeline.ttl
   ```
 
-✅ Complete solution available in **`task-1` branch**.
+✅ Complete solution available in [**`task-1` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-1).
 
 
 #### Task 2: Convert the weather data from JSON to RDF
@@ -387,7 +387,7 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
   LOG_LEVEL=debug npx rdfc pipeline.ttl
   ```
 
-✅ Complete solution available in **`task-2` branch**.
+✅ Complete solution available in [**`task-2` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-2).
 
 
 #### Task 3: Validate the produced RDF with SHACL
@@ -495,7 +495,7 @@ To help you with this, we prepared a [SHACL shape file](./pipeline/resources/sha
     npx rdfc pipeline.ttl
     ```
 
-✅ Complete solution available in **`task-3` branch**.
+✅ Complete solution available in [**`task-3` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-3).
 
 
 #### Task 4: Ingest validated RDF weather data into Virtuoso triple store
