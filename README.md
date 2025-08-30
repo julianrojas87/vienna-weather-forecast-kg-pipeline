@@ -502,49 +502,12 @@ To help you with this, we prepared a [Docker Compose file](./pipeline/resources/
 The instance provided in the Docker Compose file is configured to be accessible at `http://localhost:8890/sparql` with SPARQL update enabled.
 
 **Processors to add:**
-
-- `rdfc:Sdsify` – convert RDF to SDS records, implemented in TypeScript (implementation & documentation at [@rdfc/sds-processors-ts](https://github.com/rdf-connect/sds-processors-ts))  
-- `rdfc:SPARQLIngest` – send SDS records to Virtuoso, implemented in TypeScript (implementation & documentation at [@rdfc/sparql-ingest-processor-ts](https://github.com/rdf-connect/sparql-ingest-processor-ts))  
+ 
+- `rdfc:SPARQLIngest` – produce and execute SPARQL UPDATE queries from received triples/quads, implemented in TypeScript (implementation & documentation at [@rdfc/sparql-ingest-processor-ts](https://github.com/rdf-connect/sparql-ingest-processor-ts))  
 
 **Steps:**
 
-- [ ] Convert validated RDF to SDS records with `rdfc:Sdsify`
-  - Install the processor
-    ```bash
-    npm install @rdfc/sds-processors-ts
-    ```
-  - Import its semantic definition into the pipeline
-    ```turtle
-    ### Import runners and processors
-    <> owl:imports <./node_modules/@rdfc/sds-processors-ts/configs/sdsify.ttl>.
-    ```
-  - Define a channel for the SDS records
-    ```turtle
-    ### Define the channels
-    <sdsified> a rdfc:Reader, rdfc:Writer.
-    ```
-  - Create an instance and configure it to read the validated RDF data and output SDS records, and set an SDS stream ID (e.g., `http://ex.org/ViennaWeather`)
-    ```turtle
-      ### Define the processors
-      # Processor to describe every entity as part of a SDS stream for further processing
-      <sdsifier> a rdfc:Sdsify;
-          rdfc:input <validated>;
-          rdfc:output <sdsified>;
-          rdfc:stream <http://ex.org/ViennaWeather>.
-    ```
-  - Link it to the corresponding runner: `rdfc:NodeRunner`
-    ```turtle
-    ### Define the pipeline
-    <> a rdfc:Pipeline;
-       rdfc:consistsOf [
-           rdfc:instantiates rdfc:NodeRunner;
-           rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <sdsifier>;
-       ], [
-           rdfc:instantiaties rdfc:JvmRunner;
-           rdfc:processor <mapper>;
-       ].
-    ```
-- [ ] Add the `rdfc:SPARQLIngest` processor instance to ingest SDS records into the Virtuoso instance
+- [ ] Add the `rdfc:SPARQLIngest` processor instance to ingest RDF data into the Virtuoso instance
   - Install the processor
     ```bash
     npm install @rdfc/sparql-ingest-processor-ts
@@ -564,12 +527,10 @@ The instance provided in the Docker Compose file is configured to be accessible 
     ### Define the processors
     # Processor to ingest SDS records into a SPARQL endpoint
     <ingester> a rdfc:SPARQLIngest;
-        rdfc:memberStream <sdsified>;
+        rdfc:memberStream <validated>;
         rdfc:ingestConfig [
-            rdfc:memberIsGraph false;
             rdfc:targetNamedGraph "http://ex.org/ViennaWeather";
             rdfc:graphStoreUrl "http://localhost:8890/sparql";
-            rdfc:forVirtuoso true
         ];
         rdfc:sparqlWriter <sparql>.
     ```
@@ -579,13 +540,21 @@ The instance provided in the Docker Compose file is configured to be accessible 
     <> a rdfc:Pipeline;
        rdfc:consistsOf [
            rdfc:instantiates rdfc:NodeRunner;
-           rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <sdsifier>, <ingester>;
+           rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <ingester>;
        ], [
            rdfc:instantiaties rdfc:JvmRunner;
            rdfc:processor <mapper>;
        ].
     ```
 - [ ] Change the input channel of the first `rdfc:LogProcessorJs` processor to the output channel of the `rdfc:SPARQLIngest` processor to log the SPARQL queries that are sent to the Virtuoso instance.
+```turtle
+### Define the processors
+# Processor to log the output
+<logger> a rdfc:LogProcessorJs;
+    rdfc:reader <sparql>;  # update the channel it logs
+    rdfc:level "info";
+    rdfc:label "output".
+```
 - [ ] Start the Virtuoso instance via Docker Compose (if you haven't already)
   ```bash
   cd resources
@@ -598,9 +567,16 @@ The instance provided in the Docker Compose file is configured to be accessible 
   LOG_LEVEL=debug npx rdfc pipeline.ttl
   ```
 
-✅ Complete solution available in **`task-4` branch**.  
+✅ Complete solution available in [**`task-4` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-4).  
 
-🎉 You have now completed **Part 1**! Your pipeline fetches, converts, validates, and ingests Vienna’s weather forecast into Virtuoso. You can query the data using SPARQL.
+🎉 You have now completed **Part 1**! Your pipeline fetches, converts, validates, and ingests Vienna’s weather forecast into Virtuoso. You can query the data using SPARQL, by opening your browser at <http://localhost:8890/sparql> and running the following query:
+```sparql
+SELECT * WHERE {
+  GRAPH <http://ex.org/ViennaWeather> {
+    ?s ?p ?o.
+  }
+}
+```
 
 
 ---
