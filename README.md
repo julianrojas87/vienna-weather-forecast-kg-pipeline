@@ -583,7 +583,7 @@ SELECT * WHERE {
 
 ### Part 2: Implementing a Custom Processor
 
-The data includes **German literals** (`@de`). To make it more accessible, we will implement a **custom Python processor** that translates them into English (`@en`) using a lightweight local ML model from Hugging Face.
+The RDF data we produced in Part 1 includes **German literals** (`@de`). To make it more accessible, we will implement a **custom Python processor** that translates them into English (`@en`) using a lightweight local Machine Learning model from [Hugging Face](https://huggingface.co).
 
 #### Task 5: Set up the processor project
 
@@ -597,12 +597,21 @@ We will use the [template-processor-py](https://github.com/rdf-connect/template-
 **Steps:**
 
 - [ ] Either clone the template or use the preconfigured project in `processor/`  
-- [ ] Install dependencies (see template `README.md`)  
+- [ ] Install dependencies (see the `README.md` in the `procesor/` directory) 
+  - Create a virtual environment using `hatch`
+  ```bash
+  hatch env create
+  hatch shell
+  ```
 - [ ] Rename the template processor (e.g., `TranslationProcessor`) in `processor.py`, `processor.ttl`, `pyproject.toml`, and `README.md`
   - See "Next Steps" in the `README.md` file of the template repository for guidance.
 - [ ] Build and verify  
+```bash
+hatch build
+hatch test
+```
 
-✅ Complete solution available in **`task-5` branch**
+✅ Complete solution available in [**`task-5` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-5)
 
 
 #### Task 6: Implement translation logic
