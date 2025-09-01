@@ -645,7 +645,7 @@ rdfc:TranslationProcessor rdfc:pyImplementationOf rdfc:Processor;
     rdfc:class "TranslationProcessor".
     
 [ ] a sh:NodeShape;
-    sh:targetClass rdfc:TranslationProcessorPy;
+    sh:targetClass rdfc:TranslationProcessor;
     sh:property [
         sh:class rdfc:Reader;
         sh:path rdfc:reader;
@@ -777,6 +777,9 @@ hatch test
 
 Run your Python processor inside the pipeline with a Python runner for RDF-Connect.
 
+**Processors to add:**
+- `rdfc:TranslationProcessor` — German to English RDF literal translation (implemented in the previous step).
+
 **Runners to add:**
 - `rdfc:PyRunner` — run Python processors (implementation & documentation at [rdf-connect/py-runner](https://github.com/rdf-connect/py-runner)).
 
@@ -823,20 +826,41 @@ Run your Python processor inside the pipeline with a Python runner for RDF-Conne
     ### Import runners and processors
     <> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_translation_processor/processor.ttl>.
     ```
-  - Define input and output channels for your processor
+  - Define a channel for the translated data
     ```turtle
     ### Define the channels
     <translated> a rdfc:Reader, rdfc:Writer.
     ```
   - Create an instance of your processor and configure it to read from the output channel of the RML mapper and write to the new output channel
+  ```turtle
+  ### Define the processors
+  # Processor to translate RDF literals from German to English
+  <translator> a rdfc:TranslationProcessor;
+      rdfc:reader <rdf>;
+      rdfc:writer <translated>;
+      rdfc:model "Helsinki-NLP/opus-mt-de-en";
+      rdfc:sourceLanguage "de";
+      rdfc:targetLanguage "en".
+  ```
 - [ ] Update the input channel of the SHACL validator to read from the output channel of your processor
+```turtle
+### Define the processors
+# Processor to validate the output RDF with SHACL
+<validator> a rdfc:Validate;
+    rdfc:shaclPath <./resources/shacl-shape.ttl>;
+    rdfc:incoming <translated>;
+    rdfc:outgoing <validated>;
+    rdfc:report <report>;
+    rdfc:validationIsFatal false;
+    rdfc:mime "text/turtle".
+  ```
 - [ ] Add `rdfc:PyRunner` to the pipeline and attach your processor that needs to be run in Python
   - Import its semantic definition
     ```turtle
     ### Import runners and processors
     <> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_runner/index.ttl>.
     ```
-  - Link it to the pipeline
+  - Link it to the pipeline and to the translation processor
     ```turtle
     ### Define the pipeline
     <> a rdfc:Pipeline;
@@ -852,7 +876,7 @@ Run your Python processor inside the pipeline with a Python runner for RDF-Conne
        ].
     ```
 
-✅ Complete solution available in **`task-7` branch**  
+✅ Complete solution available in [**`task-7` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-7)  
 
 🎉 You have now completed **Part 2**! The full pipeline now **translates German literals to English** before validation and ingestion into Virtuoso. Run the pipeline with:  
 
