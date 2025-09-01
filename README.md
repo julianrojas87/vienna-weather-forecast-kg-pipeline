@@ -866,7 +866,7 @@ Run your Python processor inside the pipeline with a Python runner for RDF-Conne
     <> a rdfc:Pipeline;
        rdfc:consistsOf [
            rdfc:instantiates rdfc:NodeRunner;
-           rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <sdsifier>, <ingester>;
+           rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <ingester>;
        ], [
            rdfc:instantiaties rdfc:JvmRunner;
            rdfc:processor <mapper>;
