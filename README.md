@@ -120,14 +120,14 @@ You may start from our provided project structure (recommended) or consult the [
   @prefix rdfc: <https://w3id.org/rdf-connect#>.
   @prefix owl: <http://www.w3.org/2002/07/owl#>.
   @prefix ex: <http://example.org/>.
-
+  
   ### Import runners and processors
-
+  
   ### Define the channels
-
+  
   ### Define the pipeline
   <> a rdfc:Pipeline.
-
+  
   ### Define the processors
   ```
 
@@ -161,7 +161,7 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
     ```turtle
     ### Import runners and processors
     <> owl:imports <./node_modules/@rdfc/http-utils-processor-ts/processors.ttl>.
-    ```  
+    ```
   - Define a channel for the fetched JSON data
     ```turtle
     ### Define the channels
@@ -212,7 +212,7 @@ Configure the pipeline to fetch weather data from GeoSphere Austria (station `11
           rdfc:reader <json>;
           rdfc:level "info";
           rdfc:label "output".
-    ``` 
+    ```
   - Attach it to the `rdfc:NodeRunner`
     ```turtle
     ### Define the pipeline
@@ -307,7 +307,7 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
         plugins {
             id 'java'
         }
-    
+        
         repositories {
             mavenCentral()
             maven { url = uri("https://jitpack.io") }  // if your processors are on GitHub
@@ -315,12 +315,12 @@ To help you with this, we prepared an [RML mapping file](./pipeline/resources/ma
         dependencies {
             implementation("com.github.rdf-connect:rml-processor-jvm:master-SNAPSHOT:all")
         }
-    
+        
         tasks.register('copyPlugins', Copy) {
             from configurations.runtimeClasspath
             into "$buildDir/plugins"
         }
-    
+        
         configurations.all {
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
         }
@@ -470,7 +470,7 @@ To help you with this, we prepared a [SHACL shape file](./pipeline/resources/sha
       rdfc:reader <validated>;  # update the channel it logs
       rdfc:level "info";
       rdfc:label "output".
-  ``` 
+  ```
 - [ ] Run the pipeline with a successfully validated result. You shall see the produced RDF in the console, similarly to the outcome of `task-2`, given that the validation is successful.
   ```bash
   npx rdfc pipeline.ttl
@@ -502,7 +502,7 @@ To help you with this, we prepared a [Docker Compose file](./pipeline/resources/
 The instance provided in the Docker Compose file is configured to be accessible at `http://localhost:8890/sparql` with SPARQL update enabled.
 
 **Processors to add:**
- 
+
 - `rdfc:SPARQLIngest` – produce and execute SPARQL UPDATE queries from received triples/quads, implemented in TypeScript (implementation & documentation at [@rdfc/sparql-ingest-processor-ts](https://github.com/rdf-connect/sparql-ingest-processor-ts))  
 
 **Steps:**
@@ -614,26 +614,163 @@ hatch test
 ✅ Complete solution available in [**`task-5` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-5)
 
 
-#### Task 6: Implement translation logic
+#### Task 6: Implement translation logic and semantic description
 
 We’ll translate German literals using the Hugging Face model [Helsinki-NLP/opus-mt-de-en](https://huggingface.co/Helsinki-NLP/opus-mt-de-en).
 
 **Steps:**
 
-- [ ] Install `transformers` and its dependencies and the `rdflib` library for RDF parsing:
-  ```bash
-  uv add transformers sacremoses sentencepiece torch rdflib
-  ```  
+- [ ] Install `transformers` and its dependencies (`sacremoses`, `sentencepiece` and `torch`), and the `rdflib` library for RDF parsing:
+```bash
+uv add transformers sacremoses sentencepiece torch rdflib
+```
+- [ ] Define the processor's argument types, which include the RDF-Connect reader and writer channels, the ML model name, the source and target translation languages
+```python
+# --- Type Definitions ---
+@dataclass
+class TranslationArgs:
+    reader: Reader
+    writer: Writer
+    model: str
+    source_language: str
+    target_language: str
+
+```
+- Define the corresponding semantic description (via a SHACL shape) for the inputs and outputs of the processor in the `processor/processor.ttl` file. Make sure the `sh:name` properties of the property shapes match the `TranslationArgs` variable names
+```turtle
+rdfc:TranslationProcessor rdfc:pyImplementationOf rdfc:Processor;
+    rdfs:label "Translation Processor";
+    rdfs:comment "A processor to translate text using a specified ML translation model.";
+    rdfc:module_path "rdfc_translation_processor.processor";
+    rdfc:class "TranslationProcessor".
+    
+[ ] a sh:NodeShape;
+    sh:targetClass rdfc:TranslationProcessorPy;
+    sh:property [
+        sh:class rdfc:Reader;
+        sh:path rdfc:reader;
+        sh:name "reader";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:class rdfc:Writer;
+        sh:path rdfc:writer;
+        sh:name "writer";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path rdfc:model;
+        sh:name "model";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path rdfc:sourceLanguage;
+        sh:name "source_language";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path rdfc:targetLanguage;
+        sh:name "target_language";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ].
+```
 - [ ] Load the model + tokenizer in `TranslationProcessor.init`  
+```python
+from transformers import pipeline
+#...
+async def init(self) -> None:
+    """This is the first function that is called (and awaited) when creating a processor.
+    This is the perfect location to start things like database connections."""
+    self.logger.debug("Initializing TranslationProcessor with args: {}".format(self.args))
+    self.translator = pipeline(task='translation', model=self.args.model)
+```
 - [ ] In `transform`, implement the logic to translate language-tagged literals:
-  - parse triples with `rdflib`  
-  - Identify literals with `@de`  
+  - parse RDF triples with `rdflib`  
+  - Identify literals in German having a `@de` tag  
   - Translate to English  
   - Emit both original and translated triples  
-- [ ] (Optional) Add unit tests  
-- [ ] Build the project  
+```python
+from rdflib import Graph, Literal
+#...
+async def transform(self) -> None:
+    """Function to start reading channels.
+    This function is called for each processor before `produce` is called.
+    Listen to the incoming stream, log them, and push them to the outgoing stream."""
+    async for data in self.args.reader.strings():
+        # Log the incoming message
+        self.logger.debug(f"Received data for translation:\n{data}")
 
-✅ Complete solution available in **`task-6` branch**
+        # Parse all triples with rdflib.
+        g = Graph()
+        g.parse(data=data, format="turtle")
+
+        # Collect new translated triples to add to the graph.
+        new_triples = []
+        for s, p, o in g:
+            if isinstance(o, Literal) and o.language == self.args.source_language:
+                # Translate the literal value
+                translated_text = self.translator(str(o))[0]['translation_text']
+                self.logger.debug(f"Translating '{o}' to '{translated_text}'")
+
+                # Create a new literal with @en language tag
+                new_literal = Literal(translated_text, lang=self.args.target_language)
+                new_triples.append((s, p, new_literal))
+
+        # Add new triples to the graph.
+        for triple in new_triples:
+            g.add(triple)
+
+        # Serialize the updated graph back to Turtle format.
+        serialized_data = g.serialize(format="turtle")
+
+        # Output the message to the writer
+        await self.args.writer.string(serialized_data)
+
+    # Close the writer after processing all messages
+    await self.args.writer.close()
+    self.logger.debug("done reading so closed writer.")
+```
+- [ ] (Optional) Add unit tests
+```python
+@pytest.mark.asyncio
+async def test_translation_process(caplog):
+    reader = DummyReader(["<http://ex.org/instance> <http://ex.org/prop> \"hallo welt\"@de."])
+    writer = AsyncMock()
+
+    args = processor.TranslationArgs(
+        reader=reader, 
+        writer=writer, 
+        model="Helsinki-NLP/opus-mt-de-en", 
+        source_language="de", 
+        target_language="en"
+    )
+    proc = processor.TranslationProcessor(args)
+    
+    caplog.set_level(logging.DEBUG)
+
+    await proc.init()
+    await proc.transform()
+
+    # Writer should be called with each message
+    actual_calls = [call.args for call in writer.string.await_args_list]
+    assert any("hello world" in str(args).lower() for args in actual_calls)
+
+    # Writer.close should be called once
+    writer.close.assert_awaited_once()
+
+    # Debug log at end should appear
+    assert "done reading so closed writer." in caplog.text
+```
+- [ ] Run the tests
+```bash
+hatch test
+```
+
+✅ Complete solution available in [**`task-6` branch**](https://github.com/rdf-connect/vienna-weather-forecast-kg-pipeline/tree/task-6)
 
 
 #### Task 7: Integrate the processor into the pipeline
